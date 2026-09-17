@@ -10,7 +10,7 @@
 ## Division of Labor
 
 ### Part 1: Prompt
-- **Responsibilities**: [Created the shell prompt to display the username, machine name, and cur                        rent working directory.]
+- **Responsibilities**: [Created the shell prompt to display the username, machine name, and current working directory.]
 - **Assigned to**: Dhruv Patel
 
 ### Part 2: Environment Variables
@@ -95,9 +95,7 @@ Each member records their contributions here.
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
-| 2026-09-14 | Implemented prompt to display current username, machine, and pwd
-               in required format. Added fallback if NULL.   
-                                      |
+| 2026-09-14 | Implemented prompt to display current username, machine, and pwd in required format. Added fallback if NULL.|
 | YYYY-MM-DD | [Description of task]  |
 | YYYY-MM-DD | [Description of task]  |
 
