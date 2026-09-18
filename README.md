@@ -6,7 +6,7 @@
 ## Group Members
 - **Rodney Carey**: @fsu.edu
 - **Dhruv Patel**: drp24@fsu.edu
-- **Mahir Asef Bin Masus**: @fsu.edu
+- **Mahir Asef Bin Masud**: mm23bu@fsu.edu
 ## Division of Labor
 
 ### Part 1: Prompt
