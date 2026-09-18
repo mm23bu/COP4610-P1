@@ -21,6 +21,12 @@ char *get_input(void) {
 		if (newln != NULL)
 			break;
 	}
+
+  /* if eof was reached without reading anything, return null*/
+  if (bufsize == 0 && buffer == NULL){
+    return NULL;
+  }
+
 	buffer = (char *)realloc(buffer, bufsize + 1);
 	buffer[bufsize] = 0;
 	return buffer;
