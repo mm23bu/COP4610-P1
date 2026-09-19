@@ -27,6 +27,17 @@ int main(void) {
         if (tokens != NULL) {
             if (tokens->size > 0) {
                 expand_tokens(tokens);
+
+                // TESTING PART 3: PATH
+                int found = expand_path(tokens);
+                if (found)
+                {
+                    printf("Command found: %s\n", tokens->items[0]);
+                }
+                else
+                {
+                    printf("Command not found\n");
+                }
             }
             free_tokens(tokens);
         }
