@@ -1,0 +1,11 @@
+bin/
+obj/
+
+*.o
+*.out
+core
+
+*.swp
+*.swo
+*~
+.DS_Store
