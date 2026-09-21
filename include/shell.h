@@ -19,13 +19,6 @@
 #define MAX_COMMANDS 3
 #define MAX_JOBS 10
 
-typedef struct {
-    char **args;       /*pointer to argv array (null terminated)*/
-    int arg_count;
-    char *input_file;
-    char *output_file;
-} SingleCommand;
-
 void record_history(const char *cmd_line);
 
 #endif
