@@ -10,39 +10,39 @@
 ## Division of Labor
 
 ### Part 1: Prompt
-- **Responsibilities**: [Created the shell prompt to display the username, machine name, and current working directory.]
+- **Responsibilities**: Display a shell prompt containing the current username, machine name, and working directory.
 - **Assigned to**: Dhruv Patel
 
 ### Part 2: Environment Variables
-- **Responsibilities**: [Description]
+- **Responsibilities**: Expand tokens beginning with `$` into their corresponding environment variable values, allowing users to reference environment variables in any shell comman
 - **Assigned to**: Mahir Masud, Rodney Carey
 
 ### Part 3: Tilde Expansion
-- **Responsibilities**: [Description]
+- **Responsibilities**: Expand the tilde (`~`) into the user's home directory when used alone or at the beginning of a path followed by `/`.
 - **Assigned to**: Rodney Carey
 
 ### Part 4: $PATH Search
-- **Responsibilities**: [Description]
+- **Responsibilities**: Locate executable commands by searching the directories listed in `$PATH`. Display an error message if a command cannot be found.
 - **Assigned to**: Dhruv Patel, Rodney Carey
 
 ### Part 5: External Command Execution
-- **Responsibilities**: [Description]
+- **Responsibilities**: Allow the shell to execute external programs, including commands with arguments, while keeping the shell itself running
 - **Assigned to**: Mahir Masud, Rodney Carey
 
 ### Part 6: I/O Redirection
-- **Responsibilities**: [Description]
+- **Responsibilities**: Support input and output redirection, allowing commands to read input from files and write output to files. Create or overwrite output files as required and report errors for invalid input files.
 - **Assigned to**: Dhruv Patel, Mahir Masud
 
 ### Part 7: Piping
-- **Responsibilities**: [Description]
+- **Responsibilities**: Support up to two pipes, allowing the output of one command to be passed as input to the next. Enable multiple connected commands to execute concurrently.
 - **Assigned to**: Rodney Carey, Dhruv Patel, Mahir Masud
 
 ### Part 8: Background Processing
-- **Responsibilities**: [Description]
+- **Responsibilities**: Allow commands to execute in the background without preventing users from entering additional commands. Track background jobs, display their status, and support background processing with piping and I/O redirection.
 - **Assigned to**: Rodney Carey, Dhruv Patel, Mahir Masud
 
 ### Part 9: Internal Command Execution
-- **Responsibilities**: [Description]
+- **Responsibilities**: Support the built-in commands `exit`, `cd`, and `jobs`. Allow users to exit the shell, change the current working directory, and view active background processes.
 - **Assigned to**: Rodney Carey, Dhruv Patel, Mahir Masud
 
 ### Extra Credit
@@ -54,10 +54,18 @@
 shell/
 │
 ├── src/
-│ └── lexer.c
+│ ├── executor.c
+│ ├── lexer.c
+│ ├── parser.c
+│ ├── jobs.c
+│ └── main.c
 │
 ├── include/
-│ └── lexer.h
+│ ├── executor.h
+│ ├── lexer.h
+│ ├── parser.h
+│ ├── jobs.h
+│ └── shell.h
 │
 ├── README.md
 └── Makefile
@@ -96,8 +104,9 @@ Each member records their contributions here.
 | Date       | Work Completed / Notes |
 |------------|------------------------|
 | 2026-09-14 | Implemented prompt to display current username, machine, and pwd in required format. Added fallback if NULL.|
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
+| 2026-09-19 | Worked on `$PATH` search to locate executable commands using the directories in the PATH environment variable.|
+| 2026-09-22 | Implemented external command using fork() and execv(), used waitpid() to wait for foreground processes to finish. Connected command execution to the `$PATH` search and main shell  |
+| 2026-09-22 | Tested external command execution on linprog to ensure commands and their arguments run correctly, and verifies that the shell continues working after commands finish|
 
 
 ### [Mahir Masud]
