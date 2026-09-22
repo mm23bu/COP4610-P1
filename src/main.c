@@ -6,6 +6,7 @@
 
 #include "lexer.h"
 #include "parser.h"
+#include "executor.h"
 
 int main(void) {
     while (1) {
@@ -28,16 +29,8 @@ int main(void) {
             if (tokens->size > 0) {
                 expand_tokens(tokens);
 
-                // TESTING PART 3: PATH
-                int found = expand_path(tokens);
-                if (found)
-                {
-                    printf("Command found: %s\n", tokens->items[0]);
-                }
-                else
-                {
-                    printf("Command not found\n");
-                }
+                // Execute command
+                execute_pipeline(tokens, input);
             }
             free_tokens(tokens);
         }
