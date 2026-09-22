@@ -8,4 +8,7 @@
 /* in-place token modifications */
 void expand_tokens(tokenlist *tokens);
 
+// Finds the command using PATH
+int expand_path(tokenlist *tokens);
+
 #endif
