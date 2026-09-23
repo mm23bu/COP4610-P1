@@ -130,23 +130,78 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
         return;
     }
 
-    // Create a child process
-    pid_t pid = fork();
-    if (pid < 0) {
-        perror("fork");
-        return;
-    }
-    if (pid == 0) {
-        // Child runs the command
-        run_child(cmd_argv[0], STDIN_FILENO, STDOUT_FILENO);
+    // create pipes
+    int pipe_fds[2 * (MAX_COMMANDS - 1)];
+    for (int i = 0; i < cmd_count - 1; i++) {
+        if (pipe(pipe_fds + i * 2) < 0) {
+            perror ("pipe");
+            return;
+        }
     }
 
+    // Create child processes
+    pid_t pids[MAX_COMMANDS];
+    for (int i=0; i< cmd_count; i++) {
+        pids[i] = fork();
+        if (pids[i] < 0){
+            perror("fork");
+            return;
+        }
+
+
+        /* decide input source */
+        if (pids[i] == 0) {
+            int in_fd = STDIN_FILENO;
+            int out_fd = STDOUT_FILENO;
+
+            if (i > 0) {
+                in_fd = pipe_fds[(i-1) * 2];
+            }
+
+            else if (input_file != NULL) {
+                in_fd = open(input_file, O_RDONLY);
+                if (in_fd < 0) {
+                    perror("open input");
+                    _exit(EXIT_FAILURE);
+                }
+
+            }
+        
+      
+          /* decide output destination */
+            if (i < cmd_count - 1) {
+              out_fd = pipe_fds[i * 2 + 1];
+            }
+
+            else if (output_file != NULL) {
+              out_fd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+              if (out_fd < 0) {
+                perror("open output");
+                _exit(EXIT_FAILURE);
+              }
+            } 
+        
+            /* close all pipe copies inherited from the parent */
+            for (int j=0; j < 2 * (cmd_count - 1); j++) {
+              close(pipe_fds[j]);
+            }
+            
+  
+            // Child runs the command
+            run_child(cmd_argv[i], in_fd, out_fd);
+        }
+    }
+    
     // Parent waits for the child
-    while (waitpid(pid, NULL, 0) == -1) {
+   
+    for (int i = 0; i < cmd_count; i++) {
+      while (waitpid(pids[i], NULL, 0) == -1) {
         if (errno == EINTR) {
             continue;
         }
         perror("waitpid");
         break;
+      }
     }
+
 }
