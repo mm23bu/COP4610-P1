@@ -70,6 +70,7 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
     // Checking syntax before changing original token array
     int has_pipe = 0;
     int has_redirection = 0;
+    int pipe_symbols = 0;
     for (size_t i = 0; i < count; i++) {
         char *item = tokens->items[i];
         if (strcmp(item, "&") == 0) {
@@ -78,6 +79,12 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
         }
         if (strcmp(item, "|") == 0) {
             has_pipe = 1;
+            pipe_symbols++;
+            // Max of two pipes
+            if (pipe_symbols >= MAX_COMMANDS) {
+                fprintf(stderr, "Error: maximum 2 pipes allowed\n");
+                return;
+            }
             if (i == 0 || i + 1 == count ||
                 strcmp(tokens->items[i - 1], "|") == 0 ||
                 strcmp(tokens->items[i + 1], "|") == 0) {
