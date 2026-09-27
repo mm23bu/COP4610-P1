@@ -2,6 +2,7 @@
 
 #include "executor.h"
 #include "parser.h"
+#include "jobs.h"
 #include <errno.h>
 
 // Close both ends of each pipe that was successfully created
@@ -28,7 +29,6 @@ static void run_child(char **argv, int in_fd, int out_fd) {
       close(out_fd);
     }
 
-    /* execve from here */
     execv(argv[0], argv);
 
     // Only runs if execv fails
@@ -47,25 +47,22 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
     // check for trailing '&', which leads to background process
     if (count > 0 && strcmp(tokens->items[count - 1], "&") == 0){
       is_bg = 1;
-      /*
       free(tokens->items[count-1]);
       tokens->items[count - 1] = NULL;
       tokens->size--;
       count--;
-      */
     }
 
+    /*
     if (is_bg) {
         fprintf(stderr, "Error: background jobs not yet supported\n");
         return;
     }
+    */ 
 
-    /*
     if (count == 0){
       return;
     }
-    */
-
 
     // Checking syntax before changing original token array
     int has_pipe = 0;
@@ -150,13 +147,8 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
         }
     }
 
-    /* suppress unused warnings until all functionalities are implemented */
-  //  (void)is_bg;
-  //  (void)input_file;
-  //  (void)output_file;
-  //  (void)cmd_argv;
-    (void)raw_cmd;
-  //  (void)run_child;
+   (void)raw_cmd;
+
   /* verification, forking, and running pipleline stages */
 
     // Check input file before forking and creating an output file. 
@@ -212,7 +204,6 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
             break; // Still close pipes and wait for earlier children
         }
 
-
         /* decide input source */
         if (pids[i] == 0) {
             int in_fd = STDIN_FILENO;
@@ -235,7 +226,6 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
                     _exit(EXIT_FAILURE);
                 }
             }
-        
       
           /* decide output destination */
             if (i < cmd_count - 1) {
@@ -273,15 +263,30 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
         created++;
     }
     
-    // Parent closes pipes, then waits for successfully created children
+    // Parent closes pipes
     close_pipes(pipe_fds, pipe_count);
-    for (int i = 0; i < created; i++) {
-      while (waitpid(pids[i], NULL, 0) == -1) {
-        if (errno == EINTR) {
-            continue;
+
+    // handle background tracking
+    static int temp_jid = 1;   // fix after add_job implementation
+
+    if (is_bg) {
+        pid_t disp;
+        if (created > 1) {
+            disp = pids[1];
+            printf("[%d] %d\n", temp_jid++, disp);
         }
-        perror("waitpid");
-        break;
-      }
+
+        else {
+           for (int i = 0; i < created; i++) {
+              while (waitpid(pids[i], NULL, 0) == -1) {
+                  if (errno == EINTR) {
+                      continue;
+                  }
+                  perror("waitpid");
+                  break;
+              }
+            }
+        }
     }
+        
 }
