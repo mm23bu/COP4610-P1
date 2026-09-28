@@ -54,10 +54,12 @@ void print_history_for_exit(void) {
         printf("No valid commands\n");
     } else if (history_count < 3) {
         // If there were less than three valid commands, print the last valid one.
-        printf("%s\n", history[history_count - 1]);
+        printf("Last valid command:\n");
+        printf("[1]: %s\n", history[history_count - 1]);
     } else {
+        printf("Last (3) valid commands:\n");
         for (int i = 0; i < 3; i++) {
-            printf("%s\n", history[i]);
+            printf("[%d]: %s\n", i + 1,  history[i]);
         }
     }
     fflush(stdout);
@@ -136,6 +138,8 @@ void update_jobs(void) {
                 }
             }
             if (!any_remaining) {
+                printf("[%d]+ %d done %s\n", jobs_list[i].job_id, (int)jobs_list[i].display_pid, jobs_list[i].cmd_line);
+                fflush(stdout);
                 jobs_list[i].active = 0;
             }
         }
