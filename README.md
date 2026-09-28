@@ -190,9 +190,13 @@ Each member records their contributions here.
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
-| YYYY-MM-DD | [Description of task]  |
+| 2026-09-14 | Initialized Git repository and established project directory layout and basic header/source architecture. |
+| 2026-09-18 | Implemented expand_tokens() in parser.c to identify $VAR tokens and perform getenv() lookups. |
+| 2026-09-21 | Established base execution architecture in executor.c: defined run_child() with dup2() stream redirection and initialized execute_pipeline() to parse and strip trailing & operators. |
+| 2026-09-22 | Implemented pipeline slicing into cmd_argv and extracted < and > filenames by null-terminating operator tokens. |
+| 2026-09-23 | Implemented pipe allocation, child process spawning with fork(), and mapped file descriptors for pipeline/redirection I/O. |
+| 2026-09-26 | Initialized background job tracking table with init_jobs() and implemented history tracking with record_history() and print_history(). |
+```[cite: 1]
 
 
 ## Meetings
