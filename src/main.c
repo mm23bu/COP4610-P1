@@ -7,14 +7,18 @@
 #include "lexer.h"
 #include "parser.h"
 #include "executor.h"
+#include "jobs.h"
 
 int main(void) {
+    init_jobs();
     while (1) {
         print_prompt();
 
         char *input = get_input();
         if (input == NULL) {
             printf("\n");
+            // If EOF, also wait for background jobs (consistent with exit)
+            wait_all_jobs();
             break;
         }
 
