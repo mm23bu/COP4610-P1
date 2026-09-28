@@ -228,7 +228,7 @@ We discussed the project requirements and the different parts that needed to be 
 We checked in on everyone's progress and discussed what had been completed and what still needed work. We also discussed whether the original division of labor needed to change based on everyone's progress and any difficulties they were having. By the end of the meeting, we had reviewed the remaining tasks and clarified everyone's responsibilities for finishing the project.
 
 
-### Meeting 2: September 26, 2026   
+### Meeting 3: September 26, 2026   
 We focused on finishing the remaining work and testing the project together. We checked the shell's features and looked for bugs or unexpected behavior that needed attention. This meeting led to additional testing and bug fixing to help make sure the project worked as expected before submission.
 
 ## Bugs
