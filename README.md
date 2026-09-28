@@ -1,12 +1,28 @@
-# COP4610-P1
-# Shell
+# COP4610-ShellProject1 (group 38)
 
-[Description]
+## Table of Contents
+- [Group Members](#group-members)
+- [Division of Labor](#division-of-labor)
+- [File Listing](#file-listing)
+- [Source File](#source-files)
+- [How to Compile & Execute](#how-to-compile--execute)
+- [Development Log](#development-log)
+- [Meetings](#meetings)
+- [Bugs](#bugs)
+- [Extra Credit](#extra-credit-1)
+- [Considerations](#considerations)
+
+This project is a custom command-line shell written in C that provides many of the basic features of a Unix shell. The shell reads and processes user commands, searches for executable programs using `$PATH`, and runs external commands using `fork()` and `execv()`.
+It also supports environment variable and tilde expansion, input and output redirection, piping between commands, background processing, and built-in commands such as `cd`, `jobs`, and `exit`. 
 
 ## Group Members
-- **Rodney Carey**: @fsu.edu
+- **Rodney Carey**: rc24n@fsu.edu
+  - Github ID: rodneycd
 - **Dhruv Patel**: drp24@fsu.edu
+  - Github ID: DhruvP16
 - **Mahir Asef Bin Masud**: mm23bu@fsu.edu
+  - Github ID: mm23bu
+
 ## Division of Labor
 
 ### Part 1: Prompt
@@ -66,6 +82,9 @@ shell/
 │ ├── parser.h
 │ ├── jobs.h
 │ └── shell.h
+│
+├── bin/
+├── obj/
 │
 ├── README.md
 └── Makefile
@@ -168,7 +187,7 @@ Alternatively, from the root project directory, you can run the executable direc
 ## Development Log
 Each member records their contributions here.
 
-### [Rodney Carey]
+### Rodney Carey
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
@@ -176,7 +195,7 @@ Each member records their contributions here.
 | YYYY-MM-DD | [Description of task]  |
 | YYYY-MM-DD | [Description of task]  |
 
-### [Dhruv Patel]
+### Dhruv Patel
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
@@ -186,7 +205,7 @@ Each member records their contributions here.
 | 2026-09-22 | Tested external command execution on linprog to ensure commands and their arguments run correctly, and verifies that the shell continues working after commands finish|
 
 
-### [Mahir Masud]
+### Mahir Masud
 
 | Date       | Work Completed / Notes |
 |------------|------------------------|
@@ -196,18 +215,21 @@ Each member records their contributions here.
 | 2026-09-22 | Implemented pipeline slicing into cmd_argv and extracted < and > filenames by null-terminating operator tokens. |
 | 2026-09-23 | Implemented pipe allocation, child process spawning with fork(), and mapped file descriptors for pipeline/redirection I/O. |
 | 2026-09-26 | Initialized background job tracking table with init_jobs() and implemented history tracking with record_history() and print_history(). |
-```[cite: 1]
+
 
 
 ## Meetings
-Document in-person meetings, their purpose, and what was discussed.
+We had three major meetings on Discord and all members attended.
 
-| Date       | Attendees            | Topics Discussed | Outcomes / Decisions |
-|------------|----------------------|------------------|-----------------------|
-| YYYY-MM-DD | [Names]              | [Agenda items]   | [Actions/Next steps]  |
-| YYYY-MM-DD | [Names]              | [Agenda items]   | [Actions/Next steps]  |
+### Meeting 1: September 13, 2026  
+We discussed the project requirements and the different parts that needed to be completed. We went over who would work on each part and how to divide the responsibilities among the group. By the end of the meeting, we had a division of labor so everyone knew which parts they were responsible for.
+
+### Meeting 2: September 20, 2026  
+We checked in on everyone's progress and discussed what had been completed and what still needed work. We also discussed whether the original division of labor needed to change based on everyone's progress and any difficulties they were having. By the end of the meeting, we had reviewed the remaining tasks and clarified everyone's responsibilities for finishing the project.
 
 
+### Meeting 2: September 26, 2026   
+We focused on finishing the remaining work and testing the project together. We checked the shell's features and looked for bugs or unexpected behavior that needed attention. This meeting led to additional testing and bug fixing to help make sure the project worked as expected before submission.
 
 ## Bugs
 - **Bug 1**: This is bug 1.
