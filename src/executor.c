@@ -1,4 +1,4 @@
-// parts 4-7 imp
+// parts 4-9 imp
 
 #include "executor.h"
 #include "parser.h"
@@ -36,6 +36,104 @@ static void run_child(char **argv, int in_fd, int out_fd) {
     _exit(127);
 }
 
+// Return a cleaned command line for job display (trim trailing & and spaces)
+static void make_display_cmd(const char *raw, char *out, size_t out_sz) {
+    if (!raw) {
+        out[0] = '\0';
+        return;
+    }
+    strncpy(out, raw, out_sz - 1);
+    out[out_sz - 1] = '\0';
+    // trim trailing spaces, '&', and spaces again
+    size_t len = strlen(out);
+    while (len > 0 && (out[len-1] == ' ' || out[len-1] == '\t' || out[len-1] == '\n')) {
+        out[len-1] = '\0';
+        len--;
+    }
+    if (len > 0 && out[len-1] == '&') {
+        out[len-1] = '\0';
+        len--;
+        while (len > 0 && (out[len-1] == ' ' || out[len-1] == '\t')) {
+            out[len-1] = '\0';
+            len--;
+        }
+    }
+}
+
+static int is_builtin(const char *cmd) {
+    return (strcmp(cmd, "exit") == 0 || strcmp(cmd, "cd") == 0 || strcmp(cmd, "jobs") == 0);
+}
+
+static void handle_cd(tokenlist *tokens, const char *raw_cmd) {
+    // record only on success per "valid commands"
+    if (tokens->size == 1) {
+        // no argument: change to HOME
+        char *home = getenv("HOME");
+        if (!home) {
+            fprintf(stderr, "cd: HOME not set\n");
+            return;
+        }
+        struct stat st;
+        if (stat(home, &st) < 0) {
+            fprintf(stderr, "cd: %s: No such file or directory\n", home);
+            return;
+        }
+        if (!S_ISDIR(st.st_mode)) {
+            fprintf(stderr, "cd: %s: Not a directory\n", home);
+            return;
+        }
+        if (chdir(home) < 0) {
+            perror("cd");
+            return;
+        }
+        char cwd[MAX_LINE];
+        if (getcwd(cwd, sizeof(cwd))) {
+            setenv("PWD", cwd, 1);
+        }
+        record_history(raw_cmd);
+    } else if (tokens->size == 2) {
+        const char *target = tokens->items[1];
+        struct stat st;
+        if (stat(target, &st) < 0) {
+            fprintf(stderr, "cd: %s: No such file or directory\n", target);
+            return;
+        }
+        if (!S_ISDIR(st.st_mode)) {
+            fprintf(stderr, "cd: %s: Not a directory\n", target);
+            return;
+        }
+        if (chdir(target) < 0) {
+            perror("cd");
+            return;
+        }
+        char cwd[MAX_LINE];
+        if (getcwd(cwd, sizeof(cwd))) {
+            setenv("PWD", cwd, 1);
+        }
+        record_history(raw_cmd);
+    } else {
+        fprintf(stderr, "cd: too many arguments\n");
+        return;
+    }
+}
+
+static void handle_jobs(const char *raw_cmd) {
+    print_jobs();
+    record_history(raw_cmd);
+}
+
+static void handle_exit(const char *raw_cmd) {
+    (void)raw_cmd;
+    // Reap update before waiting? wait_all will block until done
+    // Must wait for background processes to finish
+    wait_all_jobs();
+    print_history_for_exit();
+    // Flush before exit
+    fflush(stdout);
+    fflush(stderr);
+    exit(0);
+}
+
 void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
     if (!tokens || tokens->size == 0) {
       return;
@@ -53,25 +151,68 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
       count--;
     }
 
-    /*
-    if (is_bg) {
-        fprintf(stderr, "Error: background jobs not yet supported\n");
-        return;
-    }
-    */ 
-
     if (count == 0){
       return;
     }
 
-    // Checking syntax before changing original token array
+    // Reap completed background jobs before handling next command
+    update_jobs();
+
+    /*--- Builtin handling (check before pipe/redirection slicing) ---
+    Need to detect builtins before we modify tokens for pipes, but we must also
+    detect syntax errors like pipes/redirections with builtins.
+    */
+    char *first = tokens->items[0];
+    if (first && is_builtin(first)) {
+        // Check for pipe/redir symbols
+        int has_pipe = 0, has_redir = 0;
+        for (size_t i = 0; i < count; i++) {
+            if (strcmp(tokens->items[i], "|") == 0) has_pipe = 1;
+            if (strcmp(tokens->items[i], "<") == 0 || strcmp(tokens->items[i], ">") == 0) has_redir = 1;
+            if (strcmp(tokens->items[i], "&") == 0) {
+                fprintf(stderr, "Error: invalid background syntax\n");
+                return;
+            }
+        }
+        if (has_pipe || has_redir) {
+            fprintf(stderr, "Error: builtin commands do not support pipes or redirection\n");
+            return;
+        }
+        if (is_bg) {
+            // builtins in background not supported; treat as error or ignore &?
+            // For cd/jobs/exit, background makes no sense; we will handle as foreground
+            // But spec says background processing supported; we choose to run foreground
+        }
+        // Make a cleaned raw for history (without &)
+        char cleaned[MAX_LINE];
+        make_display_cmd(raw_cmd, cleaned, sizeof(cleaned));
+
+        if (strcmp(first, "cd") == 0) {
+            handle_cd(tokens, cleaned);
+            return;
+        } else if (strcmp(first, "jobs") == 0) {
+            // jobs should have no args? if args, error but we ignore
+            if (tokens->size > 1) {
+                fprintf(stderr, "jobs: too many arguments\n");
+                return;
+            }
+            handle_jobs(cleaned);
+            return;
+        } else if (strcmp(first, "exit") == 0) {
+            // exit should have no args; ignore extras
+            handle_exit(cleaned);
+            return; // not reached
+        }
+    }
+
+    // Checking syntax before changing original token array (for external commands)
     int has_pipe = 0;
     int has_redirection = 0;
     int pipe_symbols = 0;
     for (size_t i = 0; i < count; i++) {
         char *item = tokens->items[i];
         if (strcmp(item, "&") == 0) {
-            fprintf(stderr, "Error: background jobs not yet supported\n");
+            fprintf(stderr, "Error: invalid background syntax\n");
             return;
         }
         if (strcmp(item, "|") == 0) {
@@ -147,9 +288,11 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
         }
     }
 
-   (void)raw_cmd;
+    // Prepare cleaned display command for job table / history
+    char display_cmd[MAX_LINE];
+    make_display_cmd(raw_cmd, display_cmd, sizeof(display_cmd));
 
-  /* verification, forking, and running pipleline stages */
+   /* verification, forking, and running pipeline stages */
 
     // Check input file before forking and creating an output file. 
     if (input_file != NULL) {
@@ -267,26 +410,36 @@ void execute_pipeline(tokenlist *tokens, const char *raw_cmd){
     close_pipes(pipe_fds, pipe_count);
 
     // handle background tracking
-    static int temp_jid = 1;   // fix after add_job implementation
-
     if (is_bg) {
-        pid_t disp;
-        if (created > 1) {
-            disp = pids[1];
-            printf("[%d] %d\n", temp_jid++, disp);
-        }
-
-        else {
-           for (int i = 0; i < created; i++) {
-              while (waitpid(pids[i], NULL, 0) == -1) {
-                  if (errno == EINTR) {
-                      continue;
-                  }
-                  perror("waitpid");
-                  break;
-              }
+        // Add to jobs table and print
+        int job_id = add_job(pids, created, display_cmd);
+        if (job_id != -1) {
+            // Find display pid from job table (add_job already set)
+            // Need to retrieve display pid: for simplicity use pids[1] if pipeline else pids[0]
+            pid_t disp = (created > 1) ? pids[1] : pids[0];
+            printf("[%d] %d\n", job_id, (int)disp);
+            fflush(stdout);
+        } else {
+            // too many jobs, need to wait and clean up children
+            for (int i = 0; i < created; i++) {
+                while (waitpid(pids[i], NULL, 0) == -1) {
+                    if (errno == EINTR) continue;
+                    perror("waitpid");
+                    break;
+                }
             }
         }
+        record_history(display_cmd);
+    } else {
+        // foreground: wait for all
+        for (int i = 0; i < created; i++) {
+            int status;
+            while (waitpid(pids[i], &status, 0) == -1) {
+                if (errno == EINTR) continue;
+                perror("waitpid");
+                break;
+            }
+        }
+        record_history(display_cmd);
     }
-        
 }
