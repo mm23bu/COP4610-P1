@@ -248,11 +248,24 @@ We focused on finishing the remaining work and testing the project together. We 
 **Shell-ception**:
 - ***Implementation***: Shell-ception was supported by allowing the shell executable to be launched as a normal external command from inside an already running instance of the shell. Since external commands are executed using `fork()` and `execv()`, running `./bin/shell` starts a new child shell while the original shell remains running.
 - ***Testing***: Shell-ception was tested by starting multiple nested shell instances using `./bin/shell`. Commands such as `ls`, `pwd`, and `cd` were executed inside the nested shells to confirm that each shell worked normally. Each nested shell was then exited individually to verify that control returned to the previous shell.
+- Example Test:
+```text
+./bin/shell
+./bin/shell
+./bin/shell
+ls
+echo $USER
+exit
+pwd
+exit
+exit
+```
 
 
 
 ## Bugs and Considerations
 - No major known bugs are currently present based on the testing completed so far.
 - One consideration is that some error messages may not exactly match the wording used by Bash. However, the messages still indicate the cause of the error, such as an invalid command, missing file, invalid directory, or incorrect number of arguments.
+- If the `USER`, `PWD`, or `MACHINE` environment variable is not set, the prompt displays `unknown` for that value. This prevents the prompt from using a null value and allows the shell to continue running normally.
 
 
